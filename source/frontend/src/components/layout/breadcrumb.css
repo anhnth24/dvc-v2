@@ -1,0 +1,4 @@
+/* breadcrumb styles */
+.breadcrumb {
+  @apply text-sm text-gray-500;
+}

@@ -1,0 +1,4 @@
+/* login form styles */
+.login-form {
+  @apply space-y-4;
+}

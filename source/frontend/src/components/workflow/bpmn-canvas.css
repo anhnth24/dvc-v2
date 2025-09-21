@@ -1,0 +1,4 @@
+/* bpmn-canvas styles */
+.bpmn-canvas {
+  @apply col-span-3 border rounded h-[400px];
+}

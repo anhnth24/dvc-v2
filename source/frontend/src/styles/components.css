@@ -1,0 +1,4 @@
+/* Component-level shared styles */
+.container {
+  @apply mx-auto px-4;
+}

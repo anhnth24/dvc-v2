@@ -1,0 +1,4 @@
+/* form component styles */
+.form {
+  @apply space-y-3;
+}

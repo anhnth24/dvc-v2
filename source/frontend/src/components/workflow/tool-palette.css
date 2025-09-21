@@ -1,0 +1,4 @@
+/* tool-palette styles */
+.tool-palette {
+  @apply col-span-1 border rounded p-2;
+}

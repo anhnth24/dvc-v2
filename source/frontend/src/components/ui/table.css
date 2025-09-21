@@ -1,0 +1,4 @@
+/* table component styles */
+.table {
+  @apply w-full border-collapse;
+}

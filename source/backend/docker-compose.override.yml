@@ -1,0 +1,24 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/services/ApiGateway/Dockerfile
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  users:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  workflow:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  documents:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  notifications:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  postal:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development

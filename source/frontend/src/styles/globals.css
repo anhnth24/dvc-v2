@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #ffffff;
+  --fg: #111827;
+}
+
+html, body, #__next {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+@layer utilities {
+  .text-muted { @apply text-gray-500; }
+  .visually-hidden { @apply sr-only; }
+}
+
+@layer components {
+  .page-container { @apply mx-auto max-w-7xl px-4; }
+  .section-title { @apply text-xl font-semibold; }
+}

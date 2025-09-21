@@ -1,0 +1,4 @@
+/* input component styles */
+.input {
+  @apply border px-3 py-2 rounded w-full;
+}

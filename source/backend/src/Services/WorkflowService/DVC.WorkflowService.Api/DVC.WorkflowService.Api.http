@@ -1,0 +1,6 @@
+@DVC.WorkflowService.Api_HostAddress = http://localhost:5104
+
+GET {{DVC.WorkflowService.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,6 @@
+@DVC.DocumentService.Api_HostAddress = http://localhost:5026
+
+GET {{DVC.DocumentService.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

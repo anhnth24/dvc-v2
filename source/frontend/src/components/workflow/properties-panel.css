@@ -1,0 +1,4 @@
+/* properties-panel styles */
+.properties-panel {
+  @apply border rounded p-3;
+}

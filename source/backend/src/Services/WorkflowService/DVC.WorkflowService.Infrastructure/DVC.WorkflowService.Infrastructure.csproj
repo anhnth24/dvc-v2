@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DVC.WorkflowService.Core\DVC.WorkflowService.Core.csproj" />
+    <ProjectReference Include="..\..\..\Shared\DVC.Shared.Core\DVC.Shared.Core.csproj" />
+    <ProjectReference Include="..\..\..\Shared\DVC.Shared.Infrastructure\DVC.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

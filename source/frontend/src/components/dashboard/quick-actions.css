@@ -1,0 +1,4 @@
+/* quick-actions styles */
+.quick-actions {
+  @apply flex items-center gap-2;
+}

@@ -1,0 +1,4 @@
+/* navigation component styles */
+.app-nav {
+  @apply flex items-center gap-3;
+}

@@ -1,0 +1,4 @@
+/* document-tabs styles */
+.document-tabs {
+  @apply border-b;
+}

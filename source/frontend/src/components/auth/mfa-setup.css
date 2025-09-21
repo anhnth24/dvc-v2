@@ -1,0 +1,4 @@
+/* mfa setup styles */
+.mfa-setup {
+  @apply space-y-3;
+}

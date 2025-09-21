@@ -1,0 +1,4 @@
+/* header component styles */
+.app-header {
+  @apply w-full h-14 border-b flex items-center px-4;
+}

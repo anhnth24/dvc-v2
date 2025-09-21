@@ -1,0 +1,13 @@
+services:
+  workers-notification:
+    build:
+      context: .
+      dockerfile: docker/workers/Notification/Dockerfile
+  workers-postal:
+    build:
+      context: .
+      dockerfile: docker/workers/Postal/Dockerfile
+  workers-lgsp:
+    build:
+      context: .
+      dockerfile: docker/workers/Lgsp/Dockerfile

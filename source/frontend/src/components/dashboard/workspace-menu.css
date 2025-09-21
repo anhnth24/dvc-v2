@@ -1,0 +1,4 @@
+/* workspace-menu styles */
+.workspace-menu {
+  @apply flex flex-col gap-2;
+}

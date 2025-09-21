@@ -1,0 +1,4 @@
+/* processing-dashboard styles */
+.processing-dashboard {
+  @apply grid gap-4;
+}

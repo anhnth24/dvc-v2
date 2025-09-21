@@ -6,159 +6,159 @@ Xây dựng hệ thống xử lý văn bản chính phủ với NextJS 14, phụ
 ## CHECKLIST CHI TIẾT - KHÔNG MISS TASK
 
 ### 📦 1. Khởi tạo dự án & cấu hình cơ bản
-- [ ] Tạo NextJS 14 project với TypeScript
-- [ ] Cấu hình package.json với dependencies cần thiết
-- [ ] Setup next.config.js với App Router và cấu hình tối ưu
-- [ ] Cấu hình TypeScript (tsconfig.json) với strict mode
-- [ ] Setup Tailwind CSS (tailwind.config.js)
-- [ ] Cấu hình ESLint (.eslintrc.json)
-- [ ] Setup Prettier (.prettierrc)
-- [ ] Tạo .env.local template
-- [ ] Setup Playwright config cho E2E testing
+- [x] Tạo NextJS 14 project với TypeScript
+- [x] Cấu hình package.json với dependencies cần thiết
+- [x] Setup next.config.js với App Router và cấu hình tối ưu
+- [x] Cấu hình TypeScript (tsconfig.json) với strict mode
+- [x] Setup Tailwind CSS (tailwind.config.js)
+- [x] Cấu hình ESLint (.eslintrc.json)
+- [x] Setup Prettier (.prettierrc)
+- [x] Tạo .env.local template
+- [x] Setup Playwright config cho E2E testing
 
 ### 🏗️ 2. Cấu trúc thư mục cơ bản
-- [ ] Tạo cấu trúc thư mục public/
-  - [ ] public/images/
-  - [ ] public/icons/
-  - [ ] public/documents/
-- [ ] Tạo cấu trúc src/ với các thư mục chính
-  - [ ] src/app/
-  - [ ] src/components/
-  - [ ] src/lib/
-  - [ ] src/hooks/
-  - [ ] src/store/
-  - [ ] src/types/
-  - [ ] src/styles/
+- [x] Tạo cấu trúc thư mục public/
+  - [x] public/images/
+  - [x] public/icons/
+  - [x] public/documents/
+- [x] Tạo cấu trúc src/ với các thư mục chính
+  - [x] src/app/
+  - [x] src/components/
+  - [x] src/lib/
+  - [x] src/hooks/
+  - [x] src/store/
+  - [x] src/types/
+  - [x] src/styles/
 
 ### 📄 3. App Router - Pages Structure
-- [ ] Root layout (src/app/layout.tsx)
-- [ ] Global error page (src/app/error.tsx)
-- [ ] Loading UI (src/app/loading.tsx)
-- [ ] 404 page (src/app/not-found.tsx)
-- [ ] Homepage (src/app/page.tsx)
+- [x] Root layout (src/app/layout.tsx)
+- [x] Global error page (src/app/error.tsx)
+- [x] Loading UI (src/app/loading.tsx)
+- [x] 404 page (src/app/not-found.tsx)
+- [x] Homepage (src/app/page.tsx)
 
 **Route Groups:**
-- [ ] (auth) group với layout riêng
-  - [ ] login/page.tsx
-  - [ ] setup-mfa/page.tsx
-  - [ ] forgot-password/page.tsx
-- [ ] (dashboard) group với layout chính
-  - [ ] dashboard/page.tsx
-  - [ ] intake/page.tsx, scan/page.tsx, batch/page.tsx
-  - [ ] documents/page.tsx với dynamic routes [id]
-  - [ ] workflows/page.tsx với designer
-  - [ ] procedures/page.tsx
-  - [ ] postal/page.tsx với các sub-routes
-  - [ ] reports/page.tsx
-  - [ ] admin/page.tsx với users/roles/settings
+- [x] (auth) group với layout riêng
+  - [x] login/page.tsx
+  - [x] setup-mfa/page.tsx
+  - [x] forgot-password/page.tsx
+- [x] (dashboard) group với layout chính
+  - [x] dashboard/page.tsx
+  - [x] intake/page.tsx, scan/page.tsx, batch/page.tsx
+  - [x] documents/page.tsx với dynamic routes [id]
+  - [x] workflows/page.tsx với designer
+  - [x] procedures/page.tsx
+  - [x] postal/page.tsx với các sub-routes
+  - [x] reports/page.tsx
+  - [x] admin/page.tsx với users/roles/settings
 
 ### 🎨 4. UI Components cơ bản
-- [ ] Base UI components (src/components/ui/)
-  - [ ] button.tsx
-  - [ ] input.tsx
-  - [ ] modal.tsx
-  - [ ] table.tsx
-  - [ ] form.tsx
-  - [ ] card.tsx
-  - [ ] badge.tsx
-  - [ ] progress.tsx
-  - [ ] toast.tsx
-- [ ] Layout components (src/components/layout/)
-  - [ ] header.tsx
-  - [ ] sidebar.tsx
-  - [ ] breadcrumb.tsx
-  - [ ] navigation.tsx
-  - [ ] footer.tsx
+- [x] Base UI components (src/components/ui/)
+  - [x] button.tsx
+  - [x] input.tsx
+  - [x] modal.tsx
+  - [x] table.tsx
+  - [x] form.tsx
+  - [x] card.tsx
+  - [x] badge.tsx
+  - [x] progress.tsx
+  - [x] toast.tsx
+- [x] Layout components (src/components/layout/)
+  - [x] header.tsx
+  - [x] sidebar.tsx
+  - [x] breadcrumb.tsx
+  - [x] navigation.tsx
+  - [x] footer.tsx
 
 ### 🔐 5. Authentication Components
-- [ ] login-form.tsx với validation
-- [ ] mfa-setup.tsx cho 2FA
-- [ ] password-reset.tsx
-- [ ] protected-route.tsx wrapper
+- [x] login-form.tsx với validation (skeleton)
+- [x] mfa-setup.tsx cho 2FA (skeleton)
+- [x] password-reset.tsx
+- [x] protected-route.tsx wrapper
 
 ### 📊 6. Core Feature Components
-- [ ] Dashboard components
-  - [ ] processing-dashboard.tsx
-  - [ ] stats-cards.tsx
-  - [ ] document-tabs.tsx
-  - [ ] document-list.tsx
-  - [ ] workspace-menu.tsx
-  - [ ] quick-actions.tsx
-- [ ] Document intake components
-  - [ ] document-scanner.tsx
-  - [ ] batch-processor.tsx
-  - [ ] metadata-form.tsx
-  - [ ] validation-panel.tsx
-- [ ] Workflow components
-  - [ ] workflow-designer.tsx (skeleton)
-  - [ ] bpmn-canvas.tsx (skeleton)
-  - [ ] tool-palette.tsx
-  - [ ] properties-panel.tsx
+- [x] Dashboard components
+  - [x] processing-dashboard.tsx
+  - [x] stats-cards.tsx
+  - [x] document-tabs.tsx
+  - [x] document-list.tsx
+  - [x] workspace-menu.tsx
+  - [x] quick-actions.tsx
+- [x] Document intake components
+  - [x] document-scanner.tsx
+  - [x] batch-processor.tsx
+  - [x] metadata-form.tsx
+  - [x] validation-panel.tsx
+- [x] Workflow components
+  - [x] workflow-designer.tsx (skeleton)
+  - [x] bpmn-canvas.tsx (skeleton)
+  - [x] tool-palette.tsx
+  - [x] properties-panel.tsx
 
 ### 🔧 7. Utilities & Configurations
-- [ ] API client setup (src/lib/api.ts)
-- [ ] Authentication utilities (src/lib/auth.ts)
-- [ ] Validation schemas với Zod (src/lib/validations.ts)
-- [ ] Constants định nghĩa (src/lib/constants.ts)
-- [ ] Date utilities (src/lib/date-utils.ts)
-- [ ] File utilities (src/lib/file-utils.ts)
-- [ ] Permission checking (src/lib/permissions.ts)
+- [x] API client setup (src/lib/api.ts)
+- [x] Authentication utilities (src/lib/auth.ts)
+- [x] Validation schemas với Zod (src/lib/validations.ts)
+- [x] Constants định nghĩa (src/lib/constants.ts)
+- [x] Date utilities (src/lib/date-utils.ts)
+- [x] File utilities (src/lib/file-utils.ts)
+- [x] Permission checking (src/lib/permissions.ts)
 
 ### 🪝 8. Custom Hooks
-- [ ] use-auth.ts cho authentication
-- [ ] use-api.ts cho API calls
-- [ ] use-websocket.ts cho SignalR
-- [ ] use-notifications.ts
-- [ ] use-document.ts
-- [ ] use-workflow.ts
-- [ ] use-postal.ts
-- [ ] use-permissions.ts
-- [ ] use-debounce.ts
-- [ ] use-local-storage.ts
+- [x] use-auth.ts cho authentication
+- [x] use-api.ts cho API calls
+- [x] use-websocket.ts cho SignalR
+- [x] use-notifications.ts
+- [x] use-document.ts
+- [x] use-workflow.ts
+- [x] use-postal.ts
+- [x] use-permissions.ts
+- [x] use-debounce.ts
+- [x] use-local-storage.ts
 
 ### 🗃️ 9. State Management (Zustand)
-- [ ] auth-store.ts cho authentication state
-- [ ] document-store.ts cho document state
-- [ ] notification-store.ts
-- [ ] postal-store.ts
-- [ ] ui-store.ts cho theme/sidebar
-- [ ] workflow-store.ts
-- [ ] Store exports trong index.ts
+- [x] auth-store.ts cho authentication state
+- [x] document-store.ts cho document state
+- [x] notification-store.ts
+- [x] postal-store.ts
+- [x] ui-store.ts cho theme/sidebar
+- [x] workflow-store.ts
+- [x] Store exports trong index.ts
 
 ### 📝 10. TypeScript Types
-- [ ] auth.ts types (User, Session, etc.)
-- [ ] document.ts types (DocumentDto, Status)
-- [ ] workflow.ts types (WorkflowNode, Connection)
-- [ ] postal.ts types (Shipment, Tracking)
-- [ ] api.ts response types
-- [ ] notification.ts types
-- [ ] Export file index.ts
+- [x] auth.ts types (User, Session, etc.)
+- [x] document.ts types (DocumentDto, Status)
+- [x] workflow.ts types (WorkflowNode, Connection)
+- [x] postal.ts types (Shipment, Tracking)
+- [x] api.ts response types
+- [x] notification.ts types
+- [x] Export file index.ts
 
 ### 🎨 11. Styling Setup
-- [ ] globals.css với Tailwind directives
-- [ ] components.css cho component styles
-- [ ] themes/light.css
-- [ ] themes/dark.css
-- [ ] Tailwind custom classes trong globals.css
+- [x] globals.css với Tailwind directives
+- [x] components.css cho component styles
+- [x] themes/light.css
+- [x] themes/dark.css
+- [x] Tailwind custom classes trong globals.css
 
 ### 🛣️ 12. API Routes
-- [ ] api/auth/route.ts cho authentication
-- [ ] api/upload/route.ts cho file uploads
-- [ ] api/proxy/[...path]/route.ts cho backend proxy
+- [x] api/auth/route.ts cho authentication
+- [x] api/upload/route.ts cho file uploads
+- [x] api/proxy/[...path]/route.ts cho backend proxy
 
 ### ⚙️ 13. Middleware & Config
-- [ ] middleware.ts cho authentication check
-- [ ] Setup environment variables template
+- [x] middleware.ts cho authentication check
+- [x] Setup environment variables template
 
 ### 🧪 14. Testing Setup
 - [ ] Jest config cho unit tests
-- [ ] Playwright config cho E2E
-- [ ] Sample test files
+- [x] Playwright config cho E2E
+- [x] Sample test files
 
 ### 📚 15. Documentation
-- [ ] README.md với setup instructions
-- [ ] API documentation template
-- [ ] Component documentation
+- [x] README.md với setup instructions
+- [x] API documentation template
+- [x] Component documentation
 
 ## Nguyên tắc Implementation
 

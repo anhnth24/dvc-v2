@@ -1,0 +1,4 @@
+/* document-scanner styles */
+.document-scanner {
+  @apply border rounded p-4;
+}

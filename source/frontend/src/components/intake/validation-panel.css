@@ -1,0 +1,4 @@
+/* validation-panel styles */
+.validation-panel {
+  @apply border-l-4 border-blue-400 p-4;
+}

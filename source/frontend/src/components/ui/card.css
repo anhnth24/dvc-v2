@@ -1,0 +1,4 @@
+/* card component styles */
+.card {
+  @apply rounded border p-4 bg-white shadow-sm;
+}

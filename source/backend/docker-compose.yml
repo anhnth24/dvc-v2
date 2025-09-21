@@ -1,0 +1,58 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/services/ApiGateway/Dockerfile
+    ports:
+      - "5000:80"
+    depends_on:
+      - users
+      - workflow
+      - documents
+      - notifications
+      - postal
+
+  users:
+    build:
+      context: .
+      dockerfile: docker/services/UserService/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5101:8080"
+
+  workflow:
+    build:
+      context: .
+      dockerfile: docker/services/WorkflowService/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5201:8080"
+
+  documents:
+    build:
+      context: .
+      dockerfile: docker/services/DocumentService/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5301:8080"
+
+  notifications:
+    build:
+      context: .
+      dockerfile: docker/services/NotificationService/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5401:8080"
+
+  postal:
+    build:
+      context: .
+      dockerfile: docker/services/PostalService/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5501:8080"

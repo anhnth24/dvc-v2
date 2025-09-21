@@ -1,0 +1,4 @@
+/* metadata-form styles */
+.metadata-form {
+  @apply space-y-3;
+}

@@ -1,0 +1,4 @@
+/* workflow-designer styles */
+.workflow-designer {
+  @apply grid grid-cols-4 gap-4;
+}

@@ -1,0 +1,41 @@
+# .NET
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.pidb
+*.svclog
+*.log
+*.nupkg
+*.lock.json
+*.v2
+TestResult*/
+.vs/
+.idea/
+.DS_Store
+*.swp
+*.tmp
+*.cache
+*.coverage
+*.coveragexml
+*.db
+*.db-shm
+*.db-wal
+
+docker/**/bin/
+docker/**/obj/
+
+# Rider and VS Code
+.idea/
+.vscode/
+
+# NuGet
+.nuget/packages/
+**/packages/*
+!**/packages/build/
+
+# Build
+artifacts/

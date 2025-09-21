@@ -1,0 +1,4 @@
+/* sidebar component styles */
+.app-sidebar {
+  @apply h-full border-r p-4;
+}

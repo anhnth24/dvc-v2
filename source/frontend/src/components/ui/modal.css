@@ -1,0 +1,4 @@
+/* modal component styles */
+.modal {
+  @apply fixed inset-0 bg-black/30 flex items-center justify-center p-4;
+}

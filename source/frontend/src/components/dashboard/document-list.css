@@ -1,0 +1,4 @@
+/* document-list styles */
+.document-list {
+  @apply divide-y;
+}

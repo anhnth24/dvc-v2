@@ -1,0 +1,4 @@
+/* footer styles */
+.app-footer {
+  @apply w-full h-12 border-t flex items-center justify-center text-xs text-gray-500;
+}
