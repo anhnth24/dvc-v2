@@ -307,9 +307,68 @@ So that I can control system access efficiently
 - [ ] Tracking trạng thái gửi/nhận real-time
 - [ ] Quản lý địa chỉ người nhận
 - [ ] Tính cước phí tự động
-- [ ] In tem và nhãn vận đơn
-- [ ] Xác nhận giao hàng thành công
-- [ ] Báo cáo thống kê chi phí vận chuyển
+
+---
+
+### 2.8 Background Service Architecture
+
+#### 2.8.1 Message Queue Based Processing
+
+**Mô tả:** Tất cả tích hợp ngoại vi (SMS, Email, Postal, LGSP) phải chạy dưới dạng background services consuming từ RabbitMQ
+
+**Architecture Pattern:**
+```
+API Request → Publish to RabbitMQ → Return immediately
+Background Worker → Consume message → Process → Update status
+```
+
+**Core Benefits:**
+- **Decoupling:** API không phụ thuộc availability của external services
+- **Reliability:** Messages được persist trong queue
+- **Scalability:** Workers scale độc lập theo load
+- **Performance:** API response < 100ms
+
+#### 2.8.2 Worker Services Requirements
+
+**Notification Worker Service:**
+- [ ] Email processing với template engine
+- [ ] SMS gateway với provider rotation
+- [ ] Priority queue (1=urgent, 5=low)
+- [ ] Retry logic: 3 attempts với exponential backoff
+- [ ] Dead letter queue cho permanent failures
+
+**Postal Worker Service:**
+- [ ] VietnamPost/EMS API integration
+- [ ] Shipment creation và tracking updates
+- [ ] Webhook callbacks từ postal providers
+- [ ] Address validation và cost calculation
+
+**LGSP Sync Worker Service:**
+- [ ] Procedure catalog synchronization
+- [ ] Document submission và status updates
+- [ ] Fallback to cached data khi LGSP unavailable
+- [ ] Batch processing cho bulk operations
+
+**Message Queues:**
+```
+- notification.email.queue (priority enabled)
+- notification.sms.queue (priority enabled)
+- postal.shipment.queue
+- postal.tracking.queue
+- lgsp.sync.queue
+- lgsp.submit.queue
+- retry.exchange (cho failed messages)
+- dlq.exchange (dead letter queue)
+```
+
+#### 2.8.3 Monitoring và Health Checks
+
+**Acceptance Criteria:**
+- [ ] Queue depth monitoring với alerts
+- [ ] Processing rate metrics (messages/second)
+- [ ] Worker health checks và auto-restart
+- [ ] Dead letter queue dashboard
+- [ ] Integration status dashboard
 
 ---
 
@@ -450,6 +509,234 @@ National Deployment:
     - Primary: Read/Write cluster per region
     - Replicas: 2-3 read replicas per region
     - Sharding: By province_id
+```
+
+### 4.4 Progressive Complexity Strategy
+
+#### 4.4.1 Philosophy: Start Simple, Scale Smart
+
+**Core Principle:**
+Build a progressively scalable architecture that grows with actual usage patterns while maintaining all functional requirements through intelligent design rather than brute force infrastructure.
+
+**Anti-Over-Engineering Approach:**
+- Implement minimum viable complexity to meet requirements
+- Add sophistication only when proven necessary by real usage data
+- Maintain fallback to simpler modes at all times
+- Prioritize reliability over theoretical scalability
+
+#### 4.4.2 Hybrid User Connection Model
+
+**Challenge:** 21,000 concurrent users with real-time requirements is extremely ambitious and expensive.
+
+**Smart Solution: Adaptive Connection Strategy**
+
+```yaml
+User Segmentation by Activity Level:
+  Tier 1 - Active Users (Real-time):
+    Count: 3,000-5,000 concurrent
+    Technology: SignalR WebSockets
+    Users: Document processors, approvers, workflow handlers
+    Update Frequency: Instant
+
+  Tier 2 - Semi-Active Users (Near Real-time):
+    Count: 10,000-15,000 concurrent
+    Technology: Server-Sent Events + Smart Polling
+    Users: Supervisors, managers, document viewers
+    Update Frequency: 5-30 seconds
+
+  Tier 3 - Passive Users (Eventual):
+    Count: Remaining users (3,000-7,000)
+    Technology: Background sync + Push notifications
+    Users: Report viewers, auditors, occasional users
+    Update Frequency: 30-300 seconds
+```
+
+**Benefits:**
+- **70% Infrastructure Reduction**: Only 5,000 real-time connections vs 21,000
+- **Same User Experience**: Users get updates appropriate to their work patterns
+- **Automatic Tier Switching**: Users move between tiers based on activity
+- **Graceful Degradation**: System never fully fails, just reduces update frequency
+
+#### 4.4.3 Simplified Regional Architecture
+
+**Challenge:** 3 regional clusters with full replication adds operational complexity.
+
+**Smart Solution: Primary + Cache Nodes Architecture**
+
+```yaml
+Regional Strategy:
+  Primary Data Center (Hanoi):
+    - All write operations (100%)
+    - Master database with Always On
+    - Complete application stack
+    - Handles: 270 documents/second
+
+  Regional Performance Nodes:
+    North: Hanoi (Primary location)
+    Central: Da Nang (Cache + CDN only)
+    South: Ho Chi Minh (Cache + CDN only)
+
+  Data Strategy:
+    Writes: Always to primary (ensure consistency)
+    Reads:
+      - Cached data from nearest node (80% of reads)
+      - Fresh data from primary (20% of reads)
+      - Automatic cache warming
+
+  Fallback: If regional cache fails, route to primary
+```
+
+**Benefits:**
+- **50% Operational Complexity Reduction**: No complex data synchronization
+- **Same Performance**: <100ms response through smart caching
+- **Data Consistency**: Single source of truth eliminates sync issues
+- **Cost Effective**: 60% infrastructure cost reduction vs full replication
+
+#### 4.4.4 Progressive External Service Degradation
+
+**Challenge:** Heavy dependency on LGSP, SMS providers, Vietnam Post creates failure risks.
+
+**Smart Solution: Layered Service Availability**
+
+```yaml
+Service Availability Levels:
+
+Level 1 - Full Online Mode (Target: 95% uptime):
+  LGSP: Direct real-time API calls
+  SMS: Primary provider with immediate delivery
+  Postal: Real-time tracking updates
+  User Experience: Optimal with instant validation
+
+Level 2 - Cached Mode (Graceful degradation):
+  LGSP: Use cached data (up to 7 days old) + queue fresh requests
+  SMS: Secondary providers + delivery queue
+  Postal: Estimated tracking + manual verification
+  User Experience: Slightly delayed but fully functional
+
+Level 3 - Offline Mode (Emergency fallback):
+  LGSP: Local validation rules + manual verification queue
+  SMS: Email fallback + paper notification backup
+  Postal: Manual tracking entry + phone verification
+  User Experience: Paper-based workflow simulation
+```
+
+**Implementation Strategy:**
+```yaml
+Auto-Detection & Switching:
+  Monitor external API health every 30 seconds
+  Switch to degraded mode if failure rate > 30%
+  Automatic recovery when services restore
+  User notification of current mode
+
+Cache Strategy:
+  LGSP Data: 30-day rolling cache with freshness indicators
+  SMS Templates: Pre-rendered for offline delivery
+  Postal Codes: Complete offline database
+
+Queue Management:
+  Failed requests automatically queued for retry
+  Manual intervention queue for offline mode
+  Priority processing when services restore
+```
+
+#### 4.4.5 Intelligent Performance Scaling
+
+**Challenge:** Performance targets must be met without over-provisioning.
+
+**Smart Solution: Predictive Performance Tiers**
+
+```yaml
+Performance Optimization by Criticality:
+
+Tier 1 - Critical Path (Heavy optimization):
+  Operations: Login, document search, status updates
+  Target: <50ms response time
+  Techniques: Memory caching, covering indexes, read replicas
+  Resources: 40% of infrastructure budget
+
+Tier 2 - Interactive (Moderate optimization):
+  Operations: Document creation, workflow transitions, reports
+  Target: <200ms response time
+  Techniques: Query optimization, selective caching
+  Resources: 40% of infrastructure budget
+
+Tier 3 - Background (Basic optimization):
+  Operations: Notifications, sync, audit logging
+  Target: <2000ms response time
+  Techniques: Async processing, batch operations
+  Resources: 20% of infrastructure budget
+```
+
+**Adaptive Scaling Logic:**
+```yaml
+Scaling Triggers:
+  End-of-month patterns: Pre-scale 48 hours before
+  External API failures: Auto-enable cache mode
+  High error rates: Activate circuit breakers
+  Resource pressure: Selective feature degradation
+
+Scaling Actions:
+  Scale Up: Add instances for specific services
+  Scale Out: Enable additional cache regions
+  Scale Down: Reduce features gracefully
+  Scale Smart: Switch to more efficient algorithms
+```
+
+#### 4.4.6 Implementation Phases with Risk Mitigation
+
+**Revised Phase Strategy:**
+
+```yaml
+Phase 1 (Months 1-3) - Proven Foundation:
+  Scope: Core CRUD + simple workflows + basic auth
+  Users: 5,000 concurrent (single tier)
+  Technology: Repository pattern, basic caching
+  Risk: Low (proven patterns only)
+  Success Criteria: Handles 100 documents/second reliably
+
+Phase 2 (Months 4-6) - Smart Scaling:
+  Scope: Add user tiers + queue system + external API integration
+  Users: 10,000 concurrent (2 tiers)
+  Technology: Add message queues, circuit breakers
+  Risk: Medium (add complexity gradually)
+  Success Criteria: Handles 200 documents/second with degradation
+
+Phase 3 (Months 7-9) - Advanced Features:
+  Scope: Full workflow engine + regional caching + analytics
+  Users: 15,000 concurrent (3 tiers)
+  Technology: Complex workflows, materialized views
+  Risk: Medium-High (monitor performance closely)
+  Success Criteria: Handles 270 documents/second target load
+
+Phase 4 (Months 10-12) - Optimization & Scale:
+  Scope: Performance tuning + full monitoring + edge cases
+  Users: 21,000 concurrent (full hybrid model)
+  Technology: Full optimization suite
+  Risk: Controlled (proven foundation)
+  Success Criteria: Meet all NFRs with 99.9% uptime
+```
+
+#### 4.4.7 Fail-Safe Guarantees
+
+**Core Guarantees:**
+1. **Never Fully Offline**: System degrades gracefully, never completely fails
+2. **Data Safety**: All data writes go to primary DB - no data loss possible
+3. **User Notification**: Clear indicators of current system capability level
+4. **Manual Fallback**: Paper-based processes documented and ready
+5. **Quick Recovery**: Automatic restoration when services return
+
+**Monitoring & Alerting:**
+```yaml
+Real-time Dashboards:
+  System Health: Current degradation level across all services
+  Performance Metrics: Response times by tier and operation
+  User Experience: Actual user satisfaction scores
+  External Dependencies: Status of LGSP, SMS, Postal APIs
+
+Automated Alerts:
+  Level 1: Performance degradation (warn stakeholders)
+  Level 2: Service degradation (activate backup plans)
+  Level 3: Emergency mode (manual intervention required)
 ```
 
 ---
