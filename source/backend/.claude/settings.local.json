@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(python -m serena.cli:*)",
+      "Bash(serena check_onboarding_performed:*)",
+      "Read(//d/FIS/ai-first/dvc-v2/docs/**)",
+      "Read(//d/FIS/ai-first/dvc-v2/source/frontend/docs/**)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

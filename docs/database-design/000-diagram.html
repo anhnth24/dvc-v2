@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVC v2 Complete Database ERD</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8fafc;
+            font-size: 12px;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+            font-weight: 600;
+        }
+        .controls {
+            padding: 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-group label {
+            font-weight: 500;
+            color: #374151;
+        }
+        select, input[type="range"] {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .zoom-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .zoom-btn:hover {
+            background: #3730a3;
+        }
+        .diagram-container {
+            position: relative;
+            overflow: auto;
+            height: calc(100vh - 200px);
+            border: 1px solid #e2e8f0;
+        }
+        .diagram {
+            position: relative;
+            width: 4000px;
+            height: 3000px;
+            background: 
+                radial-gradient(circle, #e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+            transform-origin: 0 0;
+        }
+        .schema-group {
+            position: absolute;
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 15px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(5px);
+        }
+        .schema-title {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: white;
+            padding: 0 8px;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        .table {
+            position: absolute;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 180px;
+            transition: all 0.2s;
+        }
+        .table:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 100;
+            transform: scale(1.02);
+        }
+        .table-header {
+            background: #374151;
+            color: white;
+            padding: 8px 10px;
+            font-weight: bold;
+            font-size: 11px;
+            border-radius: 5px 5px 0 0;
+        }
+        .table-body {
+            padding: 0;
+            max-height: 150px;
+            overflow: hidden;
+        }
+        .field {
+            padding: 4px 8px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .field:last-child {
+            border-bottom: none;
+        }
+        .field-name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        .field-type {
+            color: #6b7280;
+            font-size: 9px;
+        }
+        .pk {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+        }
+        .fk {
+            background: #d1fae5;
+            border-left: 3px solid #10b981;
+        }
+        .pk-badge {
+            background: #f59e0b;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 8px;
+            margin-right: 4px;
+        }
+        .fk-badge {
+            background: #10b981;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 8px;
+            margin-right: 4px;
+        }
+        .relationship-line {
+            position: absolute;
+            background: #6b7280;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 200;
+        }
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 11px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            border: 1px solid #d1d5db;
+        }
+        .stats {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 200;
+        }
+        .stats-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+        .stat-item {
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>DVC v2 TTHC Management System - Complete Database ERD</h1>
+            <p>All Tables and Relationships Overview</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="schemaFilter">Show Schema:</label>
+                <select id="schemaFilter" onchange="filterSchema(this.value)">
+                    <option value="all">All Schemas</option>
+                    <option value="identity">Identity</option>
+                    <option value="organization">Organization</option>
+                    <option value="tthc">TTHC</option>
+                    <option value="workflow">Workflow</option>
+                    <option value="case">Case</option>
+                    <option value="document">Document</option>
+                    <option value="payment">Payment</option>
+                    <option value="lookup">Lookup</option>
+                    <option value="audit">Audit</option>
+                    <option value="system">System</option>
+                </select>
+            </div>
+            
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()">Zoom In</button>
+                <button class="zoom-btn" onclick="zoomOut()">Zoom Out</button>
+                <button class="zoom-btn" onclick="resetZoom()">Reset</button>
+                <span id="zoomLevel">100%</span>
+            </div>
+        </div>
+        
+        <div class="diagram-container" id="diagramContainer">
+            <div class="diagram" id="diagram">
+                <!-- Legend -->
+                <div class="legend">
+                    <div class="legend-title">Schema Legend</div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #dbeafe;"></div>
+                        Identity & Auth
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #d1fae5;"></div>
+                        Organization
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fef3c7;"></div>
+                        TTHC Management
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ede9fe;"></div>
+                        Workflow
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fee2e2;"></div>
+                        Case Processing
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #cffafe;"></div>
+                        Document
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ecfdf5;"></div>
+                        Payment
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f3f4f6;"></div>
+                        Lookup/System
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats">
+                    <div class="stats-title">Database Stats</div>
+                    <div class="stat-item">Total Tables: 80+</div>
+                    <div class="stat-item">Schemas: 11</div>
+                    <div class="stat-item">Main Entities: 15</div>
+                    <div class="stat-item">Lookup Tables: 20+</div>
+                    <div class="stat-item">Capacity: 800K docs/month</div>
+                    <div class="stat-item">Users: 21K concurrent</div>
+                </div>
+
+                <!-- IDENTITY SCHEMA -->
+                <div class="schema-group" style="border-color: #3b82f6; background: rgba(219,234,254,0.1); left: 50px; top: 50px; width: 800px; height: 650px;">
+                    <div class="schema-title" style="color: #3b82f6;">[identity] Identity & Authentication</div>
+                </div>
+
+                <!-- Identity Tables -->
+                <div class="table identity" style="left: 70px; top: 90px;">
+                    <div class="table-header">[identity].USER_PROFILE</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>UserID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">Username</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">Email</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">HoVaTen</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>GioiTinhID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">IsActive</span><span class="field-type">BIT</span></div>
+                        <div class="field"><span class="field-name">TwoFactorEnabled</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table identity" style="left: 280px; top: 90px;">
+                    <div class="table-header">[identity].USER_SESSIONS</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>SessionID</span><span class="field-type">NVARCHAR(128)</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>UserID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">IPAddress</span><span class="field-type">NVARCHAR(45)</span></div>
+                        <div class="field"><span class="field-name">CreatedAt</span><span class="field-type">DATETIME2</span></div>
+                        <div class="field"><span class="field-name">ExpiresAt</span><span class="field-type">DATETIME2</span></div>
+                    </div>
+                </div>
+
+                <div class="table identity" style="left: 490px; top: 90px;">
+                    <div class="table-header">[identity].RBAC_ROLE</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>RoleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">RoleCode</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">RoleName</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">NodePath</span><span class="field-type">HIERARCHYID</span></div>
+                        <div class="field"><span class="field-name">RoleType</span><span class="field-type">NVARCHAR(50)</span></div>
+                    </div>
+                </div>
+
+                <div class="table identity" style="left: 700px; top: 90px;">
+                    <div class="table-header">[identity].RBAC_PERMISSION</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>PermissionID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">PermissionCode</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">Module</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field"><span class="field-name">Action</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field"><span class="field-name">Resource</span><span class="field-type">NVARCHAR(100)</span></div>
+                    </div>
+                </div>
+
+                <div class="table identity" style="left: 70px; top: 280px;">
+                    <div class="table-header">[identity].USER_ROLE</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>UserRoleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>UserID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>RoleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">DonViID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">EffectiveFrom</span><span class="field-type">DATETIME2</span></div>
+                    </div>
+                </div>
+
+                <div class="table identity" style="left: 280px; top: 280px;">
+                    <div class="table-header">[identity].ROLE_PERMISSION</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>RolePermissionID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>RoleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>PermissionID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">IsGranted</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table identity" style="left: 490px; top: 280px;">
+                    <div class="table-header">[identity].DELEGATION_HISTORY</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>DelegationID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>DelegatorID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>DelegateID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>RoleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">StartDate</span><span class="field-type">DATETIME2</span></div>
+                    </div>
+                </div>
+
+                <div class="table identity" style="left: 70px; top: 470px;">
+                    <div class="table-header">[identity].TEMPORAL_ROLE_ASSIGNMENT</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>TemporalRoleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>UserID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>RoleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">AssignmentType</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field"><span class="field-name">StartDate</span><span class="field-type">DATETIME2</span></div>
+                    </div>
+                </div>
+
+                <div class="table identity" style="left: 490px; top: 470px;">
+                    <div class="table-header">[identity].CONGDANDOANHNGHIEP</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ThongTinCongDanID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">TechID</span><span class="field-type">UNIQUEIDENTIFIER</span></div>
+                        <div class="field"><span class="field-name">TenDayDu</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">SoGiayTo</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>GioiTinhID</span><span class="field-type">BIGINT</span></div>
+                    </div>
+                </div>
+
+                <!-- ORGANIZATION SCHEMA -->
+                <div class="schema-group" style="border-color: #10b981; background: rgba(209,250,229,0.1); left: 950px; top: 50px; width: 500px; height: 300px;">
+                    <div class="schema-title" style="color: #10b981;">[organization] Organization Structure</div>
+                </div>
+
+                <div class="table organization" style="left: 970px; top: 90px;">
+                    <div class="table-header">[organization].DM_DONVI</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>DonViID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>DonViChaID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">MaDonVi</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field"><span class="field-name">TenDonVi</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">CapDonVi</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">NodePath</span><span class="field-type">HIERARCHYID</span></div>
+                        <div class="field"><span class="field-name">Level</span><span class="field-type">COMPUTED</span></div>
+                    </div>
+                </div>
+
+                <div class="table organization" style="left: 1200px; top: 90px;">
+                    <div class="table-header">[organization].DM_DONVI_LINHVUC</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>DonViID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">LinhVucID</span><span class="field-type">INT</span></div>
+                        <div class="field"><span class="field-name">IsPrimary</span><span class="field-type">BIT</span></div>
+                        <div class="field"><span class="field-name">ProcessingCapacity</span><span class="field-type">INT</span></div>
+                    </div>
+                </div>
+
+                <!-- TTHC SCHEMA -->
+                <div class="schema-group" style="border-color: #f59e0b; background: rgba(254,243,199,0.1); left: 1500px; top: 50px; width: 1200px; height: 800px;">
+                    <div class="schema-title" style="color: #f59e0b;">[tthc] Administrative Procedures Management</div>
+                </div>
+
+                <div class="table tthc" style="left: 1520px; top: 90px;">
+                    <div class="table-header">[tthc].DM_QG_THUTUCHANHCHINH</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">MaTTHC</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field"><span class="field-name">TenTTHC</span><span class="field-type">NVARCHAR(500)</span></div>
+                        <div class="field"><span class="field-name">TrangThai</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">Version</span><span class="field-type">INT</span></div>
+                        <div class="field"><span class="field-name">NgayHieuLuc</span><span class="field-type">DATE</span></div>
+                        <div class="field"><span class="field-name">RequiresApproval</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table tthc" style="left: 1750px; top: 90px;">
+                    <div class="table-header">[tthc].DM_QG_TTHC_CACHTHUC</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>TTHCID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">KenhID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">IsAvailable</span><span class="field-type">BIT</span></div>
+                        <div class="field"><span class="field-name">AutoProcessing</span><span class="field-type">BIT</span></div>
+                        <div class="field"><span class="field-name">RequiresAppointment</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table tthc" style="left: 1980px; top: 90px;">
+                    <div class="table-header">[tthc].DM_QG_TTHC_THOIGIAN_PHILEPHI</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>CachThucID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">ThoiGianGiaiQuyet</span><span class="field-type">DECIMAL(10,2)</span></div>
+                        <div class="field"><span class="field-name">SoTienPhi</span><span class="field-type">DECIMAL(18,2)</span></div>
+                        <div class="field"><span class="field-name">SoTienLePhi</span><span class="field-type">DECIMAL(18,2)</span></div>
+                        <div class="field"><span class="field-name">DefaultWorkflowID</span><span class="field-type">BIGINT</span></div>
+                    </div>
+                </div>
+
+                <div class="table tthc" style="left: 1520px; top: 320px;">
+                    <div class="table-header">[tthc].DM_QG_TTHC_THANHPHANHOSO</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>TTHCID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">TruongHop</span><span class="field-type">NVARCHAR(500)</span></div>
+                        <div class="field"><span class="field-name">LoaiTruongHop</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">IsMandatory</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table tthc" style="left: 1750px; top: 320px;">
+                    <div class="table-header">[tthc].DM_QG_TTHC_GIAYTO</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>ThanhPhanHoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">MaGiayTo</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">TenGiayTo</span><span class="field-type">NVARCHAR(2000)</span></div>
+                        <div class="field"><span class="field-name">BatBuoc</span><span class="field-type">BIT</span></div>
+                        <div class="field"><span class="field-name">ChapNhanBanSao</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table tthc" style="left: 1980px; top: 320px;">
+                    <div class="table-header">[tthc].DM_QG_TTHC_KETQUA</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>TTHCID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">MaKetQua</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">TenKetQua</span><span class="field-type">NVARCHAR(500)</span></div>
+                        <div class="field"><span class="field-name">RequireDigitalSignature</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table tthc" style="left: 2230px; top: 90px;">
+                    <div class="table-header">[tthc].DM_QG_TTHC_COQUANTHUCHIEN</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>TTHCID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">MaDonVi</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field"><span class="field-name">TenDonVi</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">LoaiCoQuan</span><span class="field-type">TINYINT</span></div>
+                    </div>
+                </div>
+
+                <div class="table tthc" style="left: 2460px; top: 90px;">
+                    <div class="table-header">[tthc].DM_QG_TTHC_CAPTHUCHIEN</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>TTHCID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">CapThucHien</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">CanProcess</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table tthc" style="left: 1520px; top: 550px;">
+                    <div class="table-header">[tthc].FEE_CALCULATION_RULES</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>FeeRuleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>TTHCID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">ConditionType</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field"><span class="field-name">CalculationType</span><span class="field-type">NVARCHAR(20)</span></div>
+                        <div class="field"><span class="field-name">Amount</span><span class="field-type">DECIMAL(18,2)</span></div>
+                    </div>
+                </div>
+
+                <!-- WORKFLOW SCHEMA -->
+                <div class="schema-group" style="border-color: #8b5cf6; background: rgba(237,233,254,0.1); left: 50px; top: 800px; width: 800px; height: 450px;">
+                    <div class="schema-title" style="color: #8b5cf6;">[workflow] Workflow Management</div>
+                </div>
+
+                <div class="table workflow" style="left: 70px; top: 840px;">
+                    <div class="table-header">[workflow].DM_WORKFLOW</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>WorkflowID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">DonViID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">MaWorkflow</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">ElsaDefinitionId</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">TrangThai</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">Version</span><span class="field-type">INT</span></div>
+                    </div>
+                </div>
+
+                <div class="table workflow" style="left: 300px; top: 840px;">
+                    <div class="table-header">[workflow].DM_WORKFLOW_STEP</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>ID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>WorkflowID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">ElsaActivityId</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">TenBuoc</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">LoaiBuoc</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">RequiredRole</span><span class="field-type">NVARCHAR(100)</span></div>
+                    </div>
+                </div>
+
+                <div class="table workflow" style="left: 530px; top: 840px;">
+                    <div class="table-header">[workflow].STEP_ROLE_ASSIGNMENT</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>StepRoleAssignmentID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">WorkflowInstanceId</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">ActivityId</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">RoleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">UserID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">Status</span><span class="field-type">TINYINT</span></div>
+                    </div>
+                </div>
+
+                <div class="table workflow" style="left: 70px; top: 1070px;">
+                    <div class="table-header">[workflow].ASSIGNMENT_RULES</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>RuleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>WorkflowID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>StepID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">RuleType</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field"><span class="field-name">TriggerField</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">AssignToValue</span><span class="field-type">NVARCHAR(200)</span></div>
+                    </div>
+                </div>
+
+                <div class="table workflow" style="left: 300px; top: 1070px;">
+                    <div class="table-header">[workflow].ESCALATION_RULES</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>EscalationRuleID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>WorkflowID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>StepID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">TriggerType</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field"><span class="field-name">TriggerThreshold</span><span class="field-type">INT</span></div>
+                        <div class="field"><span class="field-name">EscalateToType</span><span class="field-type">NVARCHAR(50)</span></div>
+                    </div>
+                </div>
+
+                <!-- CASE SCHEMA -->
+                <div class="schema-group" style="border-color: #ef4444; background: rgba(254,226,226,0.1); left: 950px; top: 400px; width: 1400px; height: 600px;">
+                    <div class="schema-title" style="color: #ef4444;">[case] Application Case Processing</div>
+                </div>
+
+                <div class="table case" style="left: 970px; top: 440px;">
+                    <div class="table-header">[case].HOSO</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">MaHoSo</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">TTHCID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">DonViNhanID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">NgayNhan</span><span class="field-type">DATETIME2</span></div>
+                        <div class="field"><span class="field-name">TrangThaiXuLy</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">TongPhiLePhi</span><span class="field-type">DECIMAL(18,2)</span></div>
+                        <div class="field"><span class="field-name">WorkflowInstanceId</span><span class="field-type">NVARCHAR(100)</span></div>
+                    </div>
+                </div>
+
+                <div class="table case" style="left: 1200px; top: 440px;">
+                    <div class="table-header">[case].NGUOIDUNGTENHOSO</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>NguoiDungTenHoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">Ten</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">SoGiayTo</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>GioiTinhID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">NgaySinh</span><span class="field-type">DATE</span></div>
+                    </div>
+                </div>
+
+                <div class="table case" style="left: 1450px; top: 440px;">
+                    <div class="table-header">[case].NGUOINOPHOSO</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>NguoiNopHoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">Ten</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">SoGiayTo</span><span class="field-type">NVARCHAR(50)</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>GioiTinhID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">SoDienThoai</span><span class="field-type">NVARCHAR(20)</span></div>
+                    </div>
+                </div>
+
+                <div class="table case" style="left: 1700px; top: 440px;">
+                    <div class="table-header">[case].QUATRINHXULY</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>QuaTrinhXuLyID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">BuocXuLy</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">NguoiXuLyID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">NgayBatDau</span><span class="field-type">DATETIME2</span></div>
+                        <div class="field"><span class="field-name">TrangThai</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">WorkflowInstanceId</span><span class="field-type">NVARCHAR(255)</span></div>
+                    </div>
+                </div>
+
+                <div class="table case" style="left: 1950px; top: 440px;">
+                    <div class="table-header">[case].HOSOBOSUNG</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>HoSoBoSungID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">NgayYeuCauBoSung</span><span class="field-type">DATETIME2</span></div>
+                        <div class="field"><span class="field-name">NoiDungYeuCauBoSung</span><span class="field-type">NVARCHAR(4000)</span></div>
+                        <div class="field"><span class="field-name">DaBoSung</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table case" style="left: 970px; top: 720px;">
+                    <div class="table-header">[case].HOSOKHONGGIAIQUYET</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>HoSoKhongGiaiQuyetID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">NgayKhongGiaiQuyet</span><span class="field-type">DATETIME2</span></div>
+                        <div class="field"><span class="field-name">LyDoKhongGiaiQuyet</span><span class="field-type">NVARCHAR(4000)</span></div>
+                    </div>
+                </div>
+
+                <div class="table case" style="left: 1220px; top: 720px;">
+                    <div class="table-header">[case].HOSOHUY</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>HoSoHuyID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">NgayHuy</span><span class="field-type">DATETIME2</span></div>
+                        <div class="field"><span class="field-name">LyDoHuy</span><span class="field-type">NVARCHAR(4000)</span></div>
+                        <div class="field"><span class="field-name">LoaiHuy</span><span class="field-type">TINYINT</span></div>
+                    </div>
+                </div>
+
+                <div class="table case" style="left: 1470px; top: 720px;">
+                    <div class="table-header">[case].HOSOTAMDUNG</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>HoSoTamDungID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field fk"><span><span class="fk-badge">FK</span>HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">NgayTamDung</span><span class="field-type">DATETIME2</span></div>
+                        <div class="field"><span class="field-name">LyDoTamDung</span><span class="field-type">NVARCHAR(4000)</span></div>
+                        <div class="field"><span class="field-name">DaTiepTuc</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <!-- DOCUMENT SCHEMA -->
+                <div class="schema-group" style="border-color: #06b6d4; background: rgba(207,250,254,0.1); left: 50px; top: 1350px; width: 750px; height: 350px;">
+                    <div class="schema-title" style="color: #06b6d4;">[document] Document Management</div>
+                </div>
+
+                <div class="table document" style="left: 70px; top: 1390px;">
+                    <div class="table-header">[document].FILEKEMTHEOHOSO</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>FileDinhKemHoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">FileID</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">FileName</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">ContentType</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">TrangThaiXuLy</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">VirusScanned</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table document" style="left: 320px; top: 1390px;">
+                    <div class="table-header">[document].FILEXULYHOSO</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>FileXuLyHoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">FileID</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">WorkflowInstanceId</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">LoaiFile</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">IsPublic</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table document" style="left: 570px; top: 1390px;">
+                    <div class="table-header">[document].FILEKETQUA</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>FileKetQuaID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">FileID</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">LoaiKetQua</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">IsSigned</span><span class="field-type">BIT</span></div>
+                        <div class="field"><span class="field-name">IsDelivered</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <!-- PAYMENT SCHEMA -->
+                <div class="schema-group" style="border-color: #84cc16; background: rgba(236,253,245,0.1); left: 900px; top: 1350px; width: 400px; height: 200px;">
+                    <div class="schema-title" style="color: #84cc16;">[payment] Payment Processing</div>
+                </div>
+
+                <div class="table payment" style="left: 920px; top: 1390px;">
+                    <div class="table-header">[payment].PHILEPHI_GIAODICH</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>PhiLePhiGiaoDichID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">HoSoID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">Phi</span><span class="field-type">DECIMAL(18,2)</span></div>
+                        <div class="field"><span class="field-name">LePhi</span><span class="field-type">DECIMAL(18,2)</span></div>
+                        <div class="field"><span class="field-name">TrangThaiThanhToan</span><span class="field-type">TINYINT</span></div>
+                        <div class="field"><span class="field-name">MaGiaoDich</span><span class="field-type">NVARCHAR(255)</span></div>
+                        <div class="field"><span class="field-name">PaymentGateway</span><span class="field-type">NVARCHAR(100)</span></div>
+                    </div>
+                </div>
+
+                <!-- LOOKUP SCHEMA -->
+                <div class="schema-group" style="border-color: #6b7280; background: rgba(243,244,246,0.1); left: 1400px; top: 1350px; width: 950px; height: 500px;">
+                    <div class="schema-title" style="color: #6b7280;">[lookup] Master Data & Reference Tables</div>
+                </div>
+
+                <div class="table lookup" style="left: 1420px; top: 1390px;">
+                    <div class="table-header">[lookup].DM_QG_TINHTRANG</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>TinhTrangID</span><span class="field-type">INT</span></div>
+                        <div class="field"><span class="field-name">MaTinhTrang</span><span class="field-type">NVARCHAR(20)</span></div>
+                        <div class="field"><span class="field-name">TenTinhTrang</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">MauSac</span><span class="field-type">NVARCHAR(7)</span></div>
+                        <div class="field"><span class="field-name">IsActive</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table lookup" style="left: 1650px; top: 1390px;">
+                    <div class="table-header">[lookup].DM_QG_GIOITINH</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>GioiTinhID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">MaGioiTinh</span><span class="field-type">NVARCHAR(10)</span></div>
+                        <div class="field"><span class="field-name">TenGioiTinh</span><span class="field-type">NVARCHAR(20)</span></div>
+                        <div class="field"><span class="field-name">IsActive</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table lookup" style="left: 1880px; top: 1390px;">
+                    <div class="table-header">[lookup].DM_CAPTHUCHIEN</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK</span>CapThucHienID</span><span class="field-type">BIGINT</span></div>
+                        <div class="field"><span class="field-name">MaCap</span><span class="field-type">NVARCHAR(10)</span></div>
+                        <div class="field"><span class="field-name">TenCap</span><span class="field-type">NVARCHAR(100)</span></div>
+                        <div class="field"><span class="field-name">Level</span><span class="field-type">INT</span></div>
+                        <div class="field"><span class="field-name">IsActive</span><span class="field-type">BIT</span></div>
+                    </div>
+                </div>
+
+                <div class="table lookup" style="left: 2110px; top: 1390px;">
+                    <div class="table-header">[lookup].DM_KENH</div>
+                    <div class="table-body">
+                        <div class="field pk"><span><span class="pk-badge">PK

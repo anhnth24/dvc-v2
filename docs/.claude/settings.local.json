@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/FIS/ai-first/dvc-v2/source/backend/docs/**)",
+      "Read(//d/FIS/ai-first/dvc-v2/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
